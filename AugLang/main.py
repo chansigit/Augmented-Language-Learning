@@ -92,9 +92,18 @@ class ExampleWindow(QMainWindow):
             self.lbl.setText(translated.text)
         elif e.key() == Qt.Key_F2:
             chosen= self.txtEdit.textCursor().selectedText()
-            self.tts.generate(chosen.strip())
-            self.tts.save("tmp.mp3")
-            QSound(r"tmp.mp3").play()
+            if chosen.strip()=="":
+                return
+
+            try:
+                self.tts.generate(chosen.strip())
+            except SSLError:
+                pass
+            self.tts.save(os.path.join(tempfile.gettempdir(),"tmp.mp3"))
+            self.sound = QtMultimedia.QMediaContent(QUrl.fromLocalFile(os.path.join(tempfile.gettempdir(),"tmp.mp3")))
+            self.player.setMedia(self.sound)
+            self.player.setVolume(100)
+            self.player.play()
 
 
 if __name__ == "__main__":
